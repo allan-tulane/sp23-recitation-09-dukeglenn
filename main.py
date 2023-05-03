@@ -1,19 +1,24 @@
 from collections import deque
 from heapq import heappush, heappop 
+import heapq
 
 def shortest_shortest_path(graph, source):
-    """
-    Params: 
-      graph.....a graph represented as a dict where each key is a vertex
-                and the value is a set of (vertex, weight) tuples (as in the test case)
-      source....the source node
-      
-    Returns:
-      a dict where each key is a vertex and the value is a tuple of
-      (shortest path weight, shortest path number of edges). See test case for example.
-    """
-    ### TODO
-    pass
+    dist = {v: (float('inf'), float('inf')) for v in graph}
+    dist[source] = (0, 0)
+    pq = [(0, source, 0)]
+    explored = set()
+    while pq:
+        d, u, n = heapq.heappop(pq)
+        if u in explored:
+            continue
+        explored.add(u)
+        for v, w in graph[u]:
+            new_dist = dist[u][0] + w
+            new_num_edges = dist[u][1] + 1
+            if new_dist < dist[v][0] or (new_dist == dist[v][0] and new_num_edges < dist[v][1]):
+                dist[v] = (new_dist, new_num_edges)
+                heapq.heappush(pq, (new_dist, v, new_num_edges))
+    return dist
     
 def test_shortest_shortest_path():
 
@@ -35,13 +40,16 @@ def test_shortest_shortest_path():
     
     
 def bfs_path(graph, source):
-    """
-    Returns:
-      a dict where each key is a vertex and the value is the parent of 
-      that vertex in the shortest path tree.
-    """
-    ###TODO
-    pass
+  parent = {v: None for v in graph}
+  parent[source] = source
+  q = deque([source])
+  while q:
+    u = q.popleft()
+    for v in graph[u]:
+      if parent[v] is None:
+        parent[v] = u
+        q.append(v)
+  return parent
 
 def get_sample_graph():
      return {'s': {'a', 'b'},
@@ -60,13 +68,12 @@ def test_bfs_path():
     assert parents['d'] == 'c'
     
 def get_path(parents, destination):
-    """
-    Returns:
-      The shortest path from the source node to this destination node 
-      (excluding the destination node itself). See test_get_path for an example.
-    """
-    ###TODO
-    pass
+  path = []
+  while destination != parents[destination]:
+    path.append(destination)
+    destination = parents[destination]
+  path.reverse()
+  return path
 
 def test_get_path():
     graph = get_sample_graph()
